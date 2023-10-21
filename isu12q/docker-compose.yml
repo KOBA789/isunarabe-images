@@ -1,0 +1,10 @@
+version: "3"
+services:
+  instance:
+    image: systemd-ubuntu:latest
+    privileged: true
+    stop_grace_period: 0s
+    shm_size: 1gb
+    volumes:
+      - ./build:/dev/shm/build:ro
+      - ./test:/dev/shm/test:ro

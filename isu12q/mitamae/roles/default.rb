@@ -1,0 +1,11 @@
+ENV['DEBIAN_FRONTEND'] = 'noninteractive'
+include_recipe '../cookbooks/common/default.rb'
+include_recipe '../cookbooks/users/isucon.rb'
+include_recipe '../cookbooks/nginx/default.rb'
+include_recipe '../cookbooks/mysql/default.rb'
+include_recipe '../cookbooks/blackauth/default.rb'
+include_recipe '../cookbooks/webapp/default.rb'
+include_recipe '../cookbooks/bench/default.rb'
+
+include_recipe '../cookbooks/data/default.rb'
+include_recipe '../cookbooks/webapp/build.rb'

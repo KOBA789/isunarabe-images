@@ -1,0 +1,24 @@
+VERSION 0.7
+
+mitamae-bin:
+  ARG MITAMAE_BIN_VERSION = v1.14.0
+  ARG MITAMAE_BIN_SHA256  = 318968af9995c83929a5aedd3216e9c4ecb14db2e53340efaac4444ff5e18bde
+
+  FROM alpine:3.18
+  RUN wget -O mitamae "https://github.com/itamae-kitchen/mitamae/releases/download/${MITAMAE_BIN_VERSION}/mitamae-x86_64-linux" && \
+    echo "${MITAMAE_BIN_SHA256} mitamae" | sha256sum -c - && \
+    chmod +x mitamae
+  SAVE ARTIFACT mitamae
+
+systemd-ubuntu:
+  FROM ubuntu:22.04
+  RUN apt-get -y update && apt-get install -y init systemd openssh-server sudo curl git rsync
+  ENTRYPOINT ["/sbin/init"]
+  SAVE IMAGE systemd-ubuntu:latest
+
+certs:
+  FROM alpine:3.18
+  RUN wget -O fullchain.pem https://github.com/KOBA789/t.isucon.pw/releases/latest/download/fullchain.pem && \
+      wget -O key.pem https://github.com/KOBA789/t.isucon.pw/releases/latest/download/key.pem
+  SAVE ARTIFACT fullchain.pem
+  SAVE ARTIFACT key.pem

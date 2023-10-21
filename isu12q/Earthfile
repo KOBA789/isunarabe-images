@@ -1,0 +1,55 @@
+VERSION 0.7
+
+IMPORT ../lib AS lib
+
+test:
+  FROM earthly/dind:alpine
+  COPY docker-compose.yml ./
+  COPY test ./test
+  COPY +mitamae-tarball/mitamae.tar.gz ./build/mitamae.tar.gz
+  WITH DOCKER --load systemd-ubuntu:latest=lib+systemd-ubuntu --compose docker-compose.yml
+    RUN docker-compose exec -T instance /bin/bash -c "cd /root && tar zxvf /dev/shm/build/mitamae.tar.gz && cd ./mitamae && ./mitamae local roles/default.rb && /dev/shm/test/run_bench.sh"
+  END
+
+original:
+  FROM scratch
+  GIT CLONE --branch 3c1451cce32b85036dcff29bcf122ea83681dbd3 https://github.com/isucon/isucon12-qualify.git original
+  SAVE ARTIFACT original
+
+blackauth:
+  FROM golang:1.21.3-alpine3.18
+  COPY +original/original/blackauth /blackauth
+  WORKDIR /blackauth
+  RUN GOOS=linux GOARCH=amd64 go build -o blackauth
+  SAVE ARTIFACT blackauth
+
+bench:
+  FROM golang:1.21.3-alpine3.18
+  COPY +original/original/bench /build/bench
+  COPY +original/original/isucon12-portal /build/isucon12-portal
+  COPY +original/original/data /build/data
+  COPY +original/original/webapp/go /build/webapp/go
+  WORKDIR /build/bench
+  RUN GOOS=linux GOARCH=amd64 go build -o bench cmd/bench/main.go
+  SAVE ARTIFACT bench
+
+initial-data:
+  FROM alpine:3.18
+  RUN wget -O initial_data.tar.gz https://github.com/isucon/isucon12-qualify/releases/download/data%2F20220712_1505-745a3fdfb5783afc048ecaebd054acd20151872d/initial_data.tar.gz
+  SAVE ARTIFACT initial_data.tar.gz
+
+mitamae-tarball:
+  FROM alpine:3.18
+  RUN apk add patch
+  COPY mitamae /mitamae
+  COPY lib+mitamae-bin/mitamae /mitamae/mitamae
+  COPY +blackauth/blackauth /mitamae/cookbooks/blackauth/blackauth
+  COPY +original/original/public /mitamae/cookbooks/data/public
+  COPY +original/original/webapp /mitamae/cookbooks/data/webapp
+  COPY +initial-data/initial_data.tar.gz /mitamae/cookbooks/data/initial_data.tar.gz
+  COPY lib+certs/fullchain.pem /mitamae/cookbooks/nginx/tls/fullchain.pem
+  COPY lib+certs/key.pem /mitamae/cookbooks/nginx/tls/key.pem
+  COPY patches /patches
+  RUN cat /patches/*.patch | patch -p1
+  RUN tar czvf mitamae.tar.gz mitamae/
+  SAVE ARTIFACT /mitamae.tar.gz AS LOCAL build/mitamae.tar.gz

@@ -1,0 +1,88 @@
+--- a/mitamae/cookbooks/data/webapp/docker-compose-go.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-go.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-java.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-java.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-node.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-node.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-perl.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-perl.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-php.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-php.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-python.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-python.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-ruby.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-ruby.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
+--- a/mitamae/cookbooks/data/webapp/docker-compose-rust.yml
++++ b/mitamae/cookbooks/data/webapp/docker-compose-rust.yml
+@@ -7,6 +7,8 @@ services:
+       ISUCON_DB_USER: isucon
+       ISUCON_DB_PASSWORD: isucon
+       ISUCON_DB_NAME: isuports
++      ISUCON_ADMIN_HOSTNAME: admin.t.isucon.pw
++      ISUCON_BASE_HOSTNAME: .t.isucon.pw
+     network_mode: host
+     volumes:
+       - /home/isucon/webapp/tenant_db:/home/isucon/webapp/tenant_db
