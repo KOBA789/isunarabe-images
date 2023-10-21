@@ -1,5 +1,9 @@
 name: reviewdog / actionlint
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   pull_request:
     paths:
