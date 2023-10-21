@@ -1,0 +1,51 @@
+name: test
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  pull_request:
+
+jobs:
+  list_images:
+    name: List images
+    runs-on: ubuntu-latest
+    outputs:
+      image_dirs_json: ${{ steps.find-images.outputs.image_dirs_json }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: find-images
+        run: |
+          IMAGE_DIRS_JSON=$(
+            find . -type d -name 'isu*' | sort -u | \
+              while read -r LINE; do
+                if ! git diff --name-only --exit-code "${GITHUB_BASE_REV}" -- "${LINE}" > /dev/null; then
+                  echo "${LINE}"
+                fi
+              done | \
+              jq -R . | jq -s -c .
+          )
+          echo "image_dirs_json=${IMAGE_DIRS_JSON}" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: test
+    needs: list_images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{fromJSON(needs.list_images.outputs.image_dirs_json)}}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: earthly/actions-setup@v1.0.8
+        with:
+          version: 0.7.20
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test
+        working-directory: ${{ matrix.dir }}
+        run: |
+          earthly -P +test
