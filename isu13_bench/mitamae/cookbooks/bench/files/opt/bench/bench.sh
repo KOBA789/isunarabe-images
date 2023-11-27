@@ -12,6 +12,6 @@ for ip in "${webapps[@]}"; do
   args+=(--webapp "$ip")
 done
 
-./bench run --target https://pipe.u.isucon.dev --enable-ssl "${args[@]}" 2>&1
+./bench run --target https://pipe.u.isucon.dev --enable-ssl "${args[@]}" 2> /dev/null
 cat /tmp/result.json > "/dev/fd/${REPORT_FD}"
 rm -f /tmp/result.json
