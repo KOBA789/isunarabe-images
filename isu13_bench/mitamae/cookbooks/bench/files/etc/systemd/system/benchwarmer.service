@@ -1,0 +1,15 @@
+[Unit]
+Description = Benchwarmer
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=isucon
+Group=isucon
+WorkingDirectory=/opt/bench
+EnvironmentFile=/opt/bench/env
+ExecStart=/opt/bench/benchwarmer --report-format scorejson --drill-descriptor /opt/bench/drill.json
+Restart=always
