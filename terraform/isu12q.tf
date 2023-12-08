@@ -1,3 +1,8 @@
+variable "isu12q_version" {
+  type    = string
+  default = "0.2.0"
+}
+
 resource "aws_imagebuilder_image_pipeline" "isu12q" {
   name                             = "isu12q"
   image_recipe_arn                 = aws_imagebuilder_image_recipe.isu12q.arn
@@ -8,7 +13,7 @@ resource "aws_imagebuilder_image_pipeline" "isu12q" {
 resource "aws_imagebuilder_image_recipe" "isu12q" {
   name         = "isu12q"
   parent_image = data.aws_ami.ubuntu_jammy.id
-  version      = "1.0.0"
+  version      = var.isu12q_version
 
   block_device_mapping {
     device_name = "/dev/sda1"
@@ -22,6 +27,11 @@ resource "aws_imagebuilder_image_recipe" "isu12q" {
 
   component {
     component_arn = aws_imagebuilder_component.isu12q.arn
+
+    parameter {
+      name  = "version"
+      value = var.isu12q_version
+    }
   }
 }
 
@@ -37,9 +47,11 @@ resource "aws_imagebuilder_distribution_configuration" "isu12q" {
 
   distribution {
     ami_distribution_configuration {
-      name = "isu12q_v{{imagebuilder:buildVersion}}_{{imagebuilder:buildDate}}"
+      name = "isu12q_{{imagebuilder:buildVersion}}_{{imagebuilder:buildDate}}"
       ami_tags = {
-        IsuconVersion = "isu12q"
+        Name             = "isu12q-v${var.isu12q_version}"
+        IsunarabeProblem = "isu12q"
+        IsunarabeVersion = var.isu12q_version
       }
       launch_permission {
         user_groups = ["all"]

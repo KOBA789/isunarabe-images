@@ -1,13 +1,17 @@
 name: isu12q
 description: isu12q
 schemaVersion: 1.0
+parameters:
+- version:
+    type: string
+    default: latest
 phases:
 - name: build
   steps:
   - name: download-tarball
     action: S3Download
     inputs:
-    - source: s3://isunarabe-images/latest/isu12q/mitamae.tar.gz
+    - source: s3://isunarabe-images/{{version}}/isu12q/mitamae.tar.gz
       destination: /dev/shm/mitamae.tar.gz
   - name: mitamae-apply
     action: ExecuteBash
@@ -18,10 +22,3 @@ phases:
         tar xzf mitamae.tar.gz
         cd mitamae
         ./mitamae local roles/default.rb
-- name: validate
-  steps:
-  - name: hello
-    action: ExecuteBash
-    inputs:
-      commands:
-        - echo "validate"
