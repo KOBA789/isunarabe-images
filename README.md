@@ -1,5 +1,5 @@
 # ISUNARABE Images
-ISUNARABE の練習 VM 用イメージをビルドするためのスクリプト。
+ISUNARABE の練習 VM 用イメージをビルドするためのパイプライン
 
 ## しくみ
 - Earthly で `mitamae.tar.gz` (mitamae-tarball) をビルドする
@@ -17,9 +17,10 @@ $ earthly +mitamae-tarball
 
 ## ローカルテスト
 systemd がインストールされたコンテナで mitamae を実行することでローカルテストを実現している。
-systemd の実行のために `-P`(privileged) オプションを付けている。
 
 ### ベンチマークまで自動実行する
+systemd の実行のために `-P`(privileged) オプションを付けている。
+
 ```console
 $ earthly -P +test
 ```
