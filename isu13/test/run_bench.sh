@@ -3,6 +3,7 @@
 set -e -Cue -o pipefail
 
 systemctl start mysql
+systemctl start pdns
 systemctl start nginx
 systemctl start isupipe-go
 

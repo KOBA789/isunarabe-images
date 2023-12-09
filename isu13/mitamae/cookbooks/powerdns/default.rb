@@ -88,5 +88,5 @@ end
 execute "systemctl daemon-reload"
 
 service "pdns" do
-  action [:enable, :restart]
+  action [:enable, :stop]
 end
