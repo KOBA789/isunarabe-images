@@ -65,6 +65,14 @@ service "systemd-resolved" do
   action [:enable, :restart]
 end
 
+# ssm-agent continues to use the old resolv.conf which points to systemd-resolved
+# but systemd-resolved does no longer provide DNS stub resolver.
+# So we need to restart ssm-agent to make it use the new resolv.conf.
+service "snap.amazon-ssm-agent.amazon-ssm-agent" do
+  action [:restart]
+  only_if "systemctl status snap.amazon-ssm-agent.amazon-ssm-agent"
+end
+
 remote_file "/opt/init_zone_once.sh" do
   mode "0755"
 end
