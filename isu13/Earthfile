@@ -18,6 +18,13 @@ original:
   RUN cd original && cat /patches/*.patch | patch -p1
   SAVE ARTIFACT original
 
+public:
+  FROM node:21-bookworm
+  COPY +original/original/frontend /frontend
+  WORKDIR /frontend
+  RUN corepack enable && yarn && yarn build
+  SAVE ARTIFACT dist
+
 xbuild:
   FROM scratch
   GIT CLONE --branch f377a40a2d3231e44bf4257e3ad3bbf6fda359b2 https://github.com/tagomoris/xbuild.git xbuild
@@ -37,6 +44,7 @@ mitamae-tarball:
   COPY lib+mitamae-bin/mitamae /mitamae/mitamae
   COPY +xbuild/xbuild /mitamae/cookbooks/xbuild/xbuild
   COPY +original/original/webapp /mitamae/cookbooks/webapp/files/home/isucon/webapp
+  COPY +public/dist /mitamae/cookbooks/webapp/files/home/isucon/webapp/public
   COPY lib+certs/fullchain.pem /mitamae/cookbooks/nginx/files/etc/nginx/tls/_.t.isucon.pw.crt
   COPY lib+certs/key.pem /mitamae/cookbooks/nginx/files/etc/nginx/tls/_.t.isucon.pw.key
   COPY +bench/bench /mitamae/cookbooks/bench/files/opt/bench/bench
