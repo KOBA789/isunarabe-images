@@ -9,5 +9,5 @@ remote_file "/etc/systemd/system/isupipe-node.service" do
 end
 
 service "isupipe-node" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end

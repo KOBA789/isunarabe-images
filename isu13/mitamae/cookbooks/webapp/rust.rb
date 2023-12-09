@@ -9,5 +9,5 @@ remote_file "/etc/systemd/system/isupipe-rust.service" do
 end
 
 service "isupipe-rust" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end

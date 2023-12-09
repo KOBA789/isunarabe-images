@@ -15,5 +15,5 @@ remote_file "/etc/systemd/system/isupipe-python.service" do
 end
 
 service "isupipe-python" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end

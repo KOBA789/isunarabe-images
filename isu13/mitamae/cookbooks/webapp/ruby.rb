@@ -9,5 +9,5 @@ remote_file "/etc/systemd/system/isupipe-ruby.service" do
 end
 
 service "isupipe-ruby" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end

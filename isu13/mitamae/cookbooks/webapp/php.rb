@@ -15,5 +15,5 @@ remote_file "/etc/systemd/system/isupipe-php.service" do
 end
 
 service "isupipe-php" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end

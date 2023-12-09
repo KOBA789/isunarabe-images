@@ -9,5 +9,5 @@ remote_file "/etc/systemd/system/isupipe-perl.service" do
 end
 
 service "isupipe-perl" do
-  action [:enable, :stop]
+  action [:disable, :stop]
 end
