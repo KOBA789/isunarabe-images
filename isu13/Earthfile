@@ -1,0 +1,44 @@
+VERSION 0.7
+
+IMPORT ../lib AS lib
+
+test:
+  FROM earthly/dind:alpine
+  COPY docker-compose.yml ./
+  COPY test ./test
+  COPY +mitamae-tarball/mitamae.tar.gz ./build/mitamae.tar.gz
+  WITH DOCKER --load systemd-ubuntu:latest=lib+systemd-ubuntu --compose docker-compose.yml
+    RUN docker-compose exec -T instance /bin/bash -c "/dev/shm/test/apply.sh && /dev/shm/test/run_bench.sh"
+  END
+
+original:
+  FROM busybox:1.36
+  GIT CLONE --branch 3d559f6be389d7b99cf0945c3f7695ce39cf510b https://github.com/isucon/isucon13.git original
+  COPY patches /patches
+  RUN cd original && cat /patches/*.patch | patch -p1
+  SAVE ARTIFACT original
+
+xbuild:
+  FROM scratch
+  GIT CLONE --branch f377a40a2d3231e44bf4257e3ad3bbf6fda359b2 https://github.com/tagomoris/xbuild.git xbuild
+  SAVE ARTIFACT xbuild
+
+bench:
+  FROM golang:1.21.3-alpine3.18
+  COPY +original/original/bench /build/bench
+  WORKDIR /build/bench
+  RUN GOOS=linux GOARCH=amd64 go build -buildvcs=false -o bench ./cmd/bench
+  SAVE ARTIFACT bench AS LOCAL build/bench
+
+mitamae-tarball:
+  FROM alpine:3.18
+  RUN apk add patch
+  COPY mitamae /mitamae
+  COPY lib+mitamae-bin/mitamae /mitamae/mitamae
+  COPY +xbuild/xbuild /mitamae/cookbooks/xbuild/xbuild
+  COPY +original/original/webapp /mitamae/cookbooks/webapp/files/home/isucon/webapp
+  COPY lib+certs/fullchain.pem /mitamae/cookbooks/nginx/files/etc/nginx/tls/_.t.isucon.pw.crt
+  COPY lib+certs/key.pem /mitamae/cookbooks/nginx/files/etc/nginx/tls/_.t.isucon.pw.key
+  COPY +bench/bench /mitamae/cookbooks/bench/files/opt/bench/bench
+  RUN tar czvf mitamae.tar.gz mitamae/
+  SAVE ARTIFACT /mitamae.tar.gz AS LOCAL build/mitamae.tar.gz

@@ -1,0 +1,14 @@
+{
+  "id": "isu13",
+  "name": "ISUCON13 過去問 v1.0",
+  "benchmarker": {
+    "parameters": [
+      {
+        "key": "targets",
+        "label": "ターゲット",
+        "description": "ベンチマーク対象のその他のサーバーIPアドレス（カンマ区切り）。最初のアドレスにDNS問い合わせを行います。",
+        "default_value": "192.168.0.11,192.168.0.12,192.168.0.13"
+      }
+    ]
+  }
+}

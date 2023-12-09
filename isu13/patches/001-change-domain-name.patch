@@ -1,0 +1,293 @@
+diff --git a/bench/cmd/bench/bench.go b/bench/cmd/bench/bench.go
+index 3eeb9a7..713429e 100644
+--- a/bench/cmd/bench/bench.go
++++ b/bench/cmd/bench/bench.go
+@@ -90,7 +90,7 @@ var run = cli.Command{
+ 	Flags: []cli.Flag{
+ 		cli.StringFlag{
+ 			Name:        "target",
+-			Value:       fmt.Sprintf("http://pipe.u.isucon.dev:%d", config.TargetPort),
++			Value:       fmt.Sprintf("http://pipe.t.isucon.pw:%d", config.TargetPort),
+ 			Destination: &config.TargetBaseURL,
+ 			EnvVar:      "BENCH_TARGET_URL",
+ 		},
+diff --git a/bench/cmd/bench/supervise.go b/bench/cmd/bench/supervise.go
+index dfd6da6..7837bdc 100644
+--- a/bench/cmd/bench/supervise.go
++++ b/bench/cmd/bench/supervise.go
+@@ -130,12 +130,12 @@ func execBench(ctx context.Context, job *Job) (*Result, error) {
+ 	}
+ 	if production {
+ 		benchOptions = append(benchOptions, "--enable-ssl")
+-		benchOptions = append(benchOptions, "--target", "https://pipe.u.isucon.dev:443")
++		benchOptions = append(benchOptions, "--target", "https://pipe.t.isucon.pw:443")
+ 	} else {
+ 		// NOTE: 開発環境(Docker)
+ 		// benchOptions = append(benchOptions, "--dns-port", strconv.Itoa(1053))
+ 		benchOptions = append(benchOptions, "--enable-ssl")
+-		benchOptions = append(benchOptions, "--target", "https://pipe.u.isucon.dev:443")
++		benchOptions = append(benchOptions, "--target", "https://pipe.t.isucon.pw:443")
+ 	}
+ 	for _, server := range job.Servers {
+ 		benchOptions = append(benchOptions, "--webapp")
+diff --git a/bench/internal/attacker/dns.go b/bench/internal/attacker/dns.go
+index a497bff..75e57e4 100644
+--- a/bench/internal/attacker/dns.go
++++ b/bench/internal/attacker/dns.go
+@@ -27,7 +27,7 @@ const (
+ 	letterIdxBits = 6
+ 	letterIdxMask = 1<<letterIdxBits - 1
+ 	letterIdxMax  = 63 / letterIdxBits
+-	zone          = "u.isucon.dev."
++	zone          = "t.isucon.pw."
+ 	maxLength     = 22
+ )
+ 
+diff --git a/bench/internal/config/benchmark.go b/bench/internal/config/benchmark.go
+index 40af89d..3103dd1 100644
+--- a/bench/internal/config/benchmark.go
++++ b/bench/internal/config/benchmark.go
+@@ -35,7 +35,7 @@ var (
+ 	InsecureSkipVerify = true
+ )
+ 
+-const BaseDomain = "u.isucon.dev"
++const BaseDomain = "t.isucon.pw"
+ 
+ // 暇になってる接続のタイムアウト
+ // NOTE: これを設定しないと、keepaliveで繋ぎっぱなしの接続が増え、Nginxでworker_connectionが不十分だというエラーログが出るようになる
+diff --git a/webapp/go/main.go b/webapp/go/main.go
+index 2064123..36ab0a0 100644
+--- a/webapp/go/main.go
++++ b/webapp/go/main.go
+@@ -124,7 +124,7 @@ func main() {
+ 	e.Logger.SetLevel(echolog.DEBUG)
+ 	e.Use(middleware.Logger())
+ 	cookieStore := sessions.NewCookieStore(secret)
+-	cookieStore.Options.Domain = "*.u.isucon.dev"
++	cookieStore.Options.Domain = "*.t.isucon.pw"
+ 	e.Use(session.Middleware(cookieStore))
+ 	// e.Use(middleware.Recover())
+ 
+diff --git a/webapp/go/user_handler.go b/webapp/go/user_handler.go
+index ea0aebf..d024a05 100644
+--- a/webapp/go/user_handler.go
++++ b/webapp/go/user_handler.go
+@@ -256,7 +256,7 @@ func registerHandler(c echo.Context) error {
+ 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to insert user theme: "+err.Error())
+ 	}
+ 
+-	if out, err := exec.Command("pdnsutil", "add-record", "u.isucon.dev", req.Name, "A", "0", powerDNSSubdomainAddress).CombinedOutput(); err != nil {
++	if out, err := exec.Command("pdnsutil", "add-record", "t.isucon.pw", req.Name, "A", "0", powerDNSSubdomainAddress).CombinedOutput(); err != nil {
+ 		return echo.NewHTTPError(http.StatusInternalServerError, string(out)+": "+err.Error())
+ 	}
+ 
+@@ -321,7 +321,7 @@ func loginHandler(c echo.Context) error {
+ 	}
+ 
+ 	sess.Options = &sessions.Options{
+-		Domain: "u.isucon.dev",
++		Domain: "t.isucon.pw",
+ 		MaxAge: int(60000),
+ 		Path:   "/",
+ 	}
+diff --git a/webapp/node/src/handlers/user-handler.ts b/webapp/node/src/handlers/user-handler.ts
+index 722483c..7faf1b8 100644
+--- a/webapp/node/src/handlers/user-handler.ts
++++ b/webapp/node/src/handlers/user-handler.ts
+@@ -183,7 +183,7 @@ export const registerHandler = async (
+       .exec([
+         'pdnsutil',
+         'add-record',
+-        'u.isucon.dev',
++        't.isucon.pw',
+         body.name,
+         'A',
+         '0',
+diff --git a/webapp/node/src/main.ts b/webapp/node/src/main.ts
+index b7ca9fc..074f482 100644
+--- a/webapp/node/src/main.ts
++++ b/webapp/node/src/main.ts
+@@ -114,7 +114,7 @@ app.use(
+     encryptionKey: '24553845-c33d-4a87-b0c3-f7a0e17fd82f',
+     cookieOptions: {
+       path: '/',
+-      domain: 'u.isucon.dev',
++      domain: 't.isucon.pw',
+       maxAge: 60_000,
+     },
+   }),
+diff --git a/webapp/pdns/init_zone.sh b/webapp/pdns/init_zone.sh
+index 6602191..865a3c4 100755
+--- a/webapp/pdns/init_zone.sh
++++ b/webapp/pdns/init_zone.sh
+@@ -11,6 +11,6 @@ ISUCON_SUBDOMAIN_ADDRESS=${ISUCON13_POWERDNS_SUBDOMAIN_ADDRESS:-127.0.0.1}
+ 
+ temp_dir=$(mktemp -d)
+ trap 'rm -rf $temp_dir' EXIT
+-sed 's/<ISUCON_SUBDOMAIN_ADDRESS>/'$ISUCON_SUBDOMAIN_ADDRESS'/g' u.isucon.dev.zone > ${temp_dir}/u.isucon.dev.zone
+-pdnsutil load-zone u.isucon.dev ${temp_dir}/u.isucon.dev.zone
++sed 's/<ISUCON_SUBDOMAIN_ADDRESS>/'$ISUCON_SUBDOMAIN_ADDRESS'/g' u.isucon.dev.zone > ${temp_dir}/t.isucon.pw.zone
++pdnsutil load-zone t.isucon.pw ${temp_dir}/t.isucon.pw.zone
+ 
+diff --git a/webapp/pdns/named.conf b/webapp/pdns/named.conf
+index 08936b2..7a42402 100644
+--- a/webapp/pdns/named.conf
++++ b/webapp/pdns/named.conf
+@@ -1,7 +1,7 @@
+ # Example for a manually configured master zone:
+ #
+-#zone "u.isucon.dev" {
+-#     file "/home/isucon/webapp/pdns/u.isucon.dev.zone";
++#zone "t.isucon.pw" {
++#     file "/home/isucon/webapp/pdns/t.isucon.pw.zone";
+ #     type master;
+ #};
+ 
+diff --git a/webapp/pdns/u.isucon.dev.zone b/webapp/pdns/u.isucon.dev.zone
+index bd387a1..37a2188 100644
+--- a/webapp/pdns/u.isucon.dev.zone
++++ b/webapp/pdns/u.isucon.dev.zone
+@@ -1,5 +1,5 @@
+ $TTL 3600
+-@   SOA  ns1 hostmaster.u.isucon.dev. (
++@   SOA  ns1 hostmaster.t.isucon.pw. (
+     0      ; serial
+     10800  ; refresh
+     3600   ; retry
+@@ -7,7 +7,7 @@ $TTL 3600
+     3600   ; ncache
+ )
+ 
+-@        0 IN NS ns1.u.isucon.dev.
++@        0 IN NS ns1.t.isucon.pw.
+ @        0 IN A  <ISUCON_SUBDOMAIN_ADDRESS>
+ ns1      0 IN A  <ISUCON_SUBDOMAIN_ADDRESS>
+ pipe     0 IN A  <ISUCON_SUBDOMAIN_ADDRESS>
+diff --git a/webapp/perl/app.psgi b/webapp/perl/app.psgi
+index 726276c..d41b7cb 100644
+--- a/webapp/perl/app.psgi
++++ b/webapp/perl/app.psgi
+@@ -12,7 +12,7 @@ builder {
+     enable 'ReverseProxy';
+     enable 'Session::Cookie',
+         session_key => 'isupipe_perl',
+-        domain      => 'u.isucon.dev',
++        domain      => 't.isucon.pw',
+         path        => '/',
+         expires     => 3600,
+         secret      => $ENV{ISUCON13_SESSION_SECRETKEY} || 'defaultsecret';
+diff --git a/webapp/perl/lib/Isupipe/Handler/UserHandler.pm b/webapp/perl/lib/Isupipe/Handler/UserHandler.pm
+index 0e290ee..bf0e19b 100644
+--- a/webapp/perl/lib/Isupipe/Handler/UserHandler.pm
++++ b/webapp/perl/lib/Isupipe/Handler/UserHandler.pm
+@@ -95,7 +95,7 @@ sub register_handler($app, $c) {
+     );
+ 
+ 
+-    my $err = system("pdnsutil", "add-record", "u.isucon.dev", $params->{name}, "A", "0", POWER_DNS_SUBDMAIN_ADDRESS);
++    my $err = system("pdnsutil", "add-record", "t.isucon.pw", $params->{name}, "A", "0", POWER_DNS_SUBDMAIN_ADDRESS);
+     if ($err) {
+         $c->halt(HTTP_INTERNAL_SERVER_ERROR, $err);
+     }
+diff --git a/webapp/php/src/User/Handler.php b/webapp/php/src/User/Handler.php
+index 1b811cf..3d77db4 100644
+--- a/webapp/php/src/User/Handler.php
++++ b/webapp/php/src/User/Handler.php
+@@ -257,7 +257,7 @@ class Handler extends AbstractHandler
+         }
+ 
+         try {
+-            $this->execCommand(['pdnsutil', 'add-record', 'u.isucon.dev', $req->name, 'A', '0', $this->powerDNSSubdomainAddress]);
++            $this->execCommand(['pdnsutil', 'add-record', 't.isucon.pw', $req->name, 'A', '0', $this->powerDNSSubdomainAddress]);
+         } catch (RuntimeException $e) {
+             throw new HttpInternalServerErrorException(
+                 request: $request,
+@@ -334,7 +334,7 @@ class Handler extends AbstractHandler
+ 
+         if (
+             session_set_cookie_params([
+-            'domain' => 'u.isucon.dev',
++            'domain' => 't.isucon.pw',
+             'lifetime' => 60000,
+             'path' => '/',
+             ]) === false
+diff --git a/webapp/php/src/User/VerifyUserSession.php b/webapp/php/src/User/VerifyUserSession.php
+index f1c0efb..2fdac5d 100644
+--- a/webapp/php/src/User/VerifyUserSession.php
++++ b/webapp/php/src/User/VerifyUserSession.php
+@@ -22,7 +22,7 @@ trait VerifyUserSession
+     {
+         if (
+             session_set_cookie_params([
+-            'domain' => '*.u.isucon.dev',
++            'domain' => '*.t.isucon.pw',
+             ]) === false
+         ) {
+             throw new HttpInternalServerErrorException(
+diff --git a/webapp/python/app.py b/webapp/python/app.py
+index 50963f2..e0d6125 100644
+--- a/webapp/python/app.py
++++ b/webapp/python/app.py
+@@ -41,7 +41,7 @@ class Settings(object):
+     POWERDNS_ENABLED = os.getenv("ISUCON13_POWERDNS_DISABLED") != "true"
+     POWERDNS_SUBDOMAIN_ADDRESS = os.getenv("ISUCON13_POWERDNS_SUBDOMAIN_ADDRESS")
+ 
+-    SESSION_COOKIE_DOMAIN = "u.isucon.dev"
++    SESSION_COOKIE_DOMAIN = "t.isucon.pw"
+     SESSION_COOKIE_PATH = "/"
+     SESSION_SECRET_KEY = os.getenv(
+         "ISUCON13_SESSION_SECRETKEY", "isucon13_session_cookiestore_defaultsecret"
+@@ -983,7 +983,7 @@ def register_handler() -> tuple[dict[str, Any], int]:
+                 [
+                     "pdnsutil",
+                     "add-record",
+-                    "u.isucon.dev",
++                    "t.isucon.pw",
+                     req["name"],
+                     "A",
+                     "0",
+diff --git a/webapp/ruby/app.rb b/webapp/ruby/app.rb
+index 5423c44..bcafa6b 100644
+--- a/webapp/ruby/app.rb
++++ b/webapp/ruby/app.rb
+@@ -14,7 +14,7 @@ module Isupipe
+   class App < Sinatra::Base
+     enable :logging
+     set :show_exceptions, :after_handler
+-    set :sessions, domain: 'u.isucon.dev', path: '/', expire_after: 1000*60
++    set :sessions, domain: 't.isucon.pw', path: '/', expire_after: 1000*60
+     set :session_secret, ENV.fetch('ISUCON13_SESSION_SECRETKEY', 'isucon13_session_cookiestore_defaultsecret').unpack('H*')[0]
+ 
+     POWERDNS_SUBDOMAIN_ADDRESS = ENV.fetch('ISUCON13_POWERDNS_SUBDOMAIN_ADDRESS')
+@@ -820,7 +820,7 @@ module Isupipe
+ 
+         tx.xquery('INSERT INTO themes (user_id, dark_mode) VALUES(?, ?)', user_id, req.theme.fetch(:dark_mode))
+ 
+-        out, status = Open3.capture2e('pdnsutil', 'add-record', 'u.isucon.dev', req.name, 'A', '0', POWERDNS_SUBDOMAIN_ADDRESS)
++        out, status = Open3.capture2e('pdnsutil', 'add-record', 't.isucon.pw', req.name, 'A', '0', POWERDNS_SUBDOMAIN_ADDRESS)
+         unless status.success?
+           raise HttpError.new(500, "pdnsutil failed with out=#{out}")
+         end
+diff --git a/webapp/rust/src/main.rs b/webapp/rust/src/main.rs
+index 764c8aa..999411d 100644
+--- a/webapp/rust/src/main.rs
++++ b/webapp/rust/src/main.rs
+@@ -1578,7 +1578,7 @@ async fn register_handler(
+ 
+     let output = tokio::process::Command::new("pdnsutil")
+         .arg("add-record")
+-        .arg("u.isucon.dev")
++        .arg("t.isucon.pw")
+         .arg(&req.name)
+         .arg("A")
+         .arg("0")
+@@ -1652,7 +1652,7 @@ async fn login_handler(
+     if let Some(cookie_value) = cookie_store.store_session(sess).await? {
+         let cookie =
+             axum_extra::extract::cookie::Cookie::build(DEFAULT_SESSION_ID_KEY, cookie_value)
+-                .domain("u.isucon.dev")
++                .domain("t.isucon.pw")
+                 .max_age(time::Duration::minutes(1000))
+                 .path("/")
+                 .finish();

@@ -1,0 +1,11 @@
+[Unit]
+Description=run isunarabe-env-ipaddr once
+Before=mysql.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/isunarabe-env-ipaddr.sh
+
+[Install]
+WantedBy=multi-user.target
