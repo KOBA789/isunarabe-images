@@ -56,6 +56,19 @@ index 40af89d..3103dd1 100644
  
  // 暇になってる接続のタイムアウト
  // NOTE: これを設定しないと、keepaliveで繋ぎっぱなしの接続が増え、Nginxでworker_connectionが不十分だというエラーログが出るようになる
+diff --git a/frontend/src/api/url.ts b/frontend/src/api/url.ts
+index c9b49cb..7a830ab 100644
+--- a/frontend/src/api/url.ts
++++ b/frontend/src/api/url.ts
+@@ -2,7 +2,7 @@ export function normalizeUrl(
+   path: string,
+   tenant?: string | undefined,
+ ): string {
+-  const hostname = tenant ? `${tenant}.u.isucon.dev` : 'pipe.u.isucon.dev';
++  const hostname = tenant ? `${tenant}.t.isucon.pw` : 'pipe.t.isucon.pw';
+   const port = window.location.port;
+   return `https://${hostname}${port ? `:${port}` : ''}${path}`;
+ }
 diff --git a/webapp/go/main.go b/webapp/go/main.go
 index 2064123..36ab0a0 100644
 --- a/webapp/go/main.go
